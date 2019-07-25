@@ -1,0 +1,8 @@
+# lib artefacts
+lib/*
+# test coverage
+coverage/*
+# data definition files
+**/*.d.ts
+# custom definition files
+/src/types/

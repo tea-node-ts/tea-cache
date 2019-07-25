@@ -1,0 +1,49 @@
+{
+  "name": "tea-cache-ts",
+  "version": "0.0.1",
+  "description": "a redis tool",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "lint": "tsc --noEmit && eslint \"*/**/*.{js,ts}\" --quiet --fix",
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+    "test": "jest --config jestconfig.json",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test && npm run lint",
+    "preversion": "npm run lint",
+    "version": "npm run format && git add -A src",
+    "postversion": "git push && git push --tags"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tea-node-ts/tea-cache-ts.git"
+  },
+  "keywords": [
+    "typescript",
+    "redis",
+    "tool"
+  ],
+  "author": "Jason Bai",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tea-node-ts/tea-cache-ts/issues"
+  },
+  "homepage": "https://github.com/tea-node-ts/tea-cache-ts#readme",
+  "devDependencies": {
+    "@types/jest": "^24.0.15",
+    "@typescript-eslint/eslint-plugin": "^1.13.0",
+    "@typescript-eslint/parser": "^1.13.0",
+    "eslint": "^6.1.0",
+    "eslint-config-prettier": "^6.0.0",
+    "eslint-plugin-prettier": "^3.1.0",
+    "jest": "^24.8.0",
+    "prettier": "^1.18.2",
+    "ts-jest": "^24.0.2",
+    "typescript": "^3.5.3"
+  },
+  "files": [
+    "lib/**/*"
+  ]
+}
