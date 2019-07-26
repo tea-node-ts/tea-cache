@@ -1,5 +1,5 @@
-# lib artefacts
-lib/*
+# dist
+dist/*
 # test coverage
 coverage/*
 # data definition files
