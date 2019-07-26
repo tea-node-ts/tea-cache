@@ -1,7 +1,16 @@
 import { promisify } from 'util';
 import { RedisClient } from 'redis';
 import { isFunction, isNumber } from 'lodash';
-import { Caching, RedisError, CachingFn } from './types';
+
+export interface Caching {
+  get<T>(key: string): Promise<T | RedisError>;
+  set(key: string, value: string, life: number): Promise<string>;
+  caching(fn: Function, life: number, getKey: Function): Function | void;
+}
+
+export type RedisError = string | null;
+
+export type CachingFn<T> = (...args: any[]) => Promise<T | RedisError>;
 
 /* global Promise */
 class Cache implements Caching {

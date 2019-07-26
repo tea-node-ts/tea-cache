@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 import Cache from '../src/index';
-import { CachingFn } from '../src/types';
+import { CachingFn } from '../src';
 import { RedisClient, Callback } from 'redis';
 
 export interface User {
