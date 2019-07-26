@@ -1,2 +1,2 @@
-# tea-cache-ts
+# tea-cache
 a redis tool
