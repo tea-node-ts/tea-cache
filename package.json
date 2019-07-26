@@ -9,7 +9,7 @@
     "watch": "tsc -w",
     "lint": "tsc --noEmit && eslint \"*/**/*.{js,ts}\" --quiet --fix",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
-    "test": "jest --config jestconfig.json",
+    "test": "jest --coverage --config jestconfig.json",
     "prepare": "npm run build",
     "prepublishOnly": "npm test && npm run lint",
     "preversion": "npm run lint",

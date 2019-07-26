@@ -1,8 +1,12 @@
 /* eslint-disable no-undef */
 import Cache from '../src/index';
-import { RedisClient, Callback, OverloadedCommand } from 'redis';
-import { User } from './types';
-import { stringLiteral } from '@babel/types';
+import { CachingFn } from '../src/types';
+import { RedisClient, Callback } from 'redis';
+
+export interface User {
+  name: string;
+  gender: string;
+}
 
 /* global describe test expect Promise */
 describe('Cache#get', (): void => {
@@ -19,9 +23,6 @@ describe('Cache#get', (): void => {
       },
       setex(key: string, seconds: number, value: string, cb?: Callback<string>): boolean {
         cb(null, 'OK');
-        return true;
-      },
-      del(): boolean {
         return true;
       },
     };
@@ -54,9 +55,6 @@ describe('Cache#get', (): void => {
         cb(null, 'OK');
         return true;
       },
-      del(): boolean {
-        return true;
-      },
     };
 
     const client = new Cache(mockClient as RedisClient);
@@ -84,9 +82,6 @@ describe('Cache#set', (): void => {
       },
       setex(key: string, seconds: number, value: string, cb?: Callback<string>): boolean {
         cb(null, 'OK');
-        return true;
-      },
-      del(): boolean {
         return true;
       },
     };
@@ -119,9 +114,6 @@ describe('Cache#set', (): void => {
         cb(null, 'OK');
         return true;
       },
-      del(): boolean {
-        return true;
-      },
     };
 
     const client = new Cache(mockClient as RedisClient);
@@ -150,9 +142,6 @@ describe('Cache#set', (): void => {
         expect(seconds).toBe(mockLife);
         expect(value).toBe('world');
         cb(null, 'OK');
-        return true;
-      },
-      del(): boolean {
         return true;
       },
     };
@@ -188,9 +177,6 @@ describe('Cache#set', (): void => {
         cb(null, 'OK');
         return true;
       },
-      del(): boolean {
-        return true;
-      },
     };
 
     const client = new Cache(mockClient as RedisClient);
@@ -200,5 +186,93 @@ describe('Cache#set', (): void => {
     const result = await client.set('hello', value, mockLife);
 
     expect(result).toBe('OK');
+  });
+});
+
+describe('Cache#caching', (): void => {
+  test('Cache#caching - when this.get return a value', async (): Promise<void> => {
+    const mockLife = 5 * 60 * 1000;
+
+    const mockClient = {
+      get(key: string, cb?: Callback<string>): boolean {
+        expect(key).toBe('hello');
+        cb(null, 'OK');
+        return true;
+      },
+      set(key: string, value: string, cb?: Callback<string>): boolean {
+        cb(null, 'OK');
+        return true;
+      },
+      setex(key: string, seconds: number, value: string, cb?: Callback<string>): boolean {
+        cb(null, 'OK');
+        return true;
+      },
+    };
+
+    const client = new Cache(mockClient as RedisClient);
+
+    const fn = async (key: string): Promise<string> => {
+      expect(key).toBe('hello');
+      return Promise.resolve('Ok');
+    };
+
+    const getKey = (...args: any[]): string => {
+      expect(args).toEqual(['hello']);
+      return args.join();
+    };
+
+    const fnAsync: CachingFn<string> = client.caching<string>(fn, mockLife, getKey);
+
+    const result = await fnAsync('hello');
+
+    expect(result).toBe('OK');
+  });
+
+  test('Cache#caching - when this.get return null', async (): Promise<void> => {
+    const mockLife = 5 * 60 * 1000;
+
+    const mockUser: User = {
+      name: 'jason',
+      gender: 'male',
+    };
+
+    const mockClient = {
+      get(key: string, cb?: Callback<string>): boolean {
+        expect(key).toBe('hello');
+        cb(null, null);
+        return true;
+      },
+      set(key: string, value: string, cb?: Callback<string>): boolean {
+        expect(key).toBe('hello');
+        expect(value).toBe('{"name":"jason","gender":"male"}');
+        cb(null, 'OK');
+        return true;
+      },
+      setex(key: string, seconds: number, value: string, cb?: Callback<string>): boolean {
+        expect(key).toBe('hello');
+        expect(seconds).toBe(mockLife);
+        expect(value).toBe('{"name":"jason","gender":"male"}');
+        cb(null, 'OK');
+        return true;
+      },
+    };
+
+    const client = new Cache(mockClient as RedisClient);
+
+    const fn = async (key: string): Promise<User> => {
+      expect(key).toEqual(['hello']);
+      return Promise.resolve(mockUser);
+    };
+
+    const getKey = (...args: any[]): string => {
+      expect(args).toEqual(['hello']);
+      return args.join();
+    };
+
+    const fnAsync: CachingFn<string> = client.caching<string>(fn, mockLife, getKey);
+
+    const result = await fnAsync('hello');
+
+    expect(result).toBe(mockUser);
   });
 });

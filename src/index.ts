@@ -1,7 +1,7 @@
 import { promisify } from 'util';
 import { RedisClient } from 'redis';
 import { isFunction, isNumber } from 'lodash';
-import { Caching, RedisError } from './types';
+import { Caching, RedisError, CachingFn } from './types';
 
 /* global Promise */
 class Cache implements Caching {
@@ -13,8 +13,6 @@ class Cache implements Caching {
 
   private setexAsync: Function;
 
-  private delAsync: Function;
-
   public constructor(client: RedisClient) {
     this.client = client;
 
@@ -23,8 +21,6 @@ class Cache implements Caching {
     this.setAsync = promisify(this.client.set).bind(this.client);
 
     this.setexAsync = promisify(this.client.setex).bind(this.client);
-
-    this.delAsync = promisify(this.client.del).bind(this.client);
   }
 
   public async get<T>(key: string): Promise<T | RedisError> {
@@ -54,14 +50,13 @@ class Cache implements Caching {
     return Promise.resolve(v);
   }
 
-  public caching<T>(fn: Function, life: number, getKey: Function): Function | void {
+  public caching<T>(fn: Function, life: number, getKey: Function): CachingFn<T> {
     if (!isFunction(fn)) throw Error('The first argument must be a function');
     if (!isNumber(life)) throw Error('The second argument must be a number and great then 0');
     if (!isFunction(getKey)) throw Error('The third argument must be a function');
 
-    return async (): Promise<T | RedisError> => {
-      const args = [...arguments];
-      const key = getKey(args);
+    return async (...args: any[]): Promise<T | RedisError> => {
+      const key = getKey(...args);
 
       const data: T | RedisError = await this.get<T>(key);
 

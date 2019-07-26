@@ -5,3 +5,5 @@ export interface Caching {
 }
 
 export type RedisError = string | null;
+
+export type CachingFn<T> = (...args: any[]) => Promise<T | RedisError>;
