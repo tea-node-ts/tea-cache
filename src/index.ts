@@ -1,6 +1,7 @@
 import { promisify } from 'util';
 import { RedisClient } from 'redis';
-import { isFunction, isNumber } from 'lodash';
+import isFunction from 'lodash/isFunction';
+import isNumber from 'lodash/isNumber';
 
 export interface Caching {
   get<T>(key: string): Promise<T | RedisError>;
